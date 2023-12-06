@@ -10,6 +10,7 @@
 new g_szModels[6][64], g_iModelCount = 0
 new g_iChances[sizeof g_szModels], g_iChanceSum = 0
 new g_pRocketMode, g_pRocketChance, g_pRocketModel
+new g_pRocketSound, g_bPlaySound = false, g_szRocketSound[128]
 
 public plugin_init()
 {
@@ -40,6 +41,14 @@ public plugin_precache()
 	{
 		set_fail_state("Failed to load any custom rocket models")
 	}
+
+	g_pRocketSound = register_cvar("custom_rocket_sound", "")
+	get_pcvar_string(g_pRocketSound, g_szRocketSound, charsmax(g_szRocketSound))
+	if( file_exists(fmt("sound/%s", g_szRocketSound)) )
+	{
+		precache_sound(g_szRocketSound)
+		g_bPlaySound = true
+	}
 }
 
 public set_rocket_model(ent)
@@ -49,6 +58,14 @@ public set_rocket_model(ent)
 		new select = get_pcvar_num(g_pRocketModel)
 		new iModel = select < 0 ? random_item(g_iChances, g_iModelCount) : clamp(select, 0, g_iModelCount-1)
 		entity_set_model(ent, g_szModels[iModel])
+
+		if( g_bPlaySound )
+		{
+			// emit_sound(0, 0, g_szRocketSound, VOL_NORM, ATTN_NONE, 0, PITCH_NORM)
+			// emit_sound(ent, 0, g_szRocketSound, VOL_NORM, ATTN_NONE, 0, PITCH_NORM)
+			client_cmd(0, "spk sound/chickenrun/grabchix.wav")
+			server_print("sound should have played")
+		}
 	}
 }
 
